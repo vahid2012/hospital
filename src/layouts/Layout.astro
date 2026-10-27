@@ -1,0 +1,85 @@
+---
+import { SITE, type Locale } from '../data/site';
+
+export type Crumb = { name: string; url: string };
+
+type Props = {
+  locale: Locale;
+  title: string;
+  metaDescription: string;
+  canonicalPath: string;
+  hreflangPath?: string;
+  breadcrumbs: Crumb[];
+  jsonLd?: object[];
+};
+
+const {
+  locale,
+  title,
+  metaDescription,
+  canonicalPath,
+  hreflangPath,
+  breadcrumbs,
+  jsonLd = [],
+} = Astro.props;
+
+const lang = locale;
+const canonical = new URL(canonicalPath, Astro.site ?? SITE.url).href;
+const hreflang = hreflangPath
+  ? new URL(hreflangPath, Astro.site ?? SITE.url).href
+  : undefined;
+const enUrl = new URL(locale === 'en' ? canonicalPath : hreflangPath ?? '/en/', Astro.site ?? SITE.url).href;
+const trUrl = new URL(locale === 'tr' ? canonicalPath : hreflangPath ?? '/tr/', Astro.site ?? SITE.url).href;
+
+const medicalBusinessLd = {
+  '@context': 'https://schema.org',
+  '@type': 'MedicalBusiness',
+  name: `${SITE.name} — ${SITE.agency}`,
+  telephone: SITE.phones.office,
+  url: SITE.url,
+  image: new URL('/images/hero-urmia.svg', SITE.url).href,
+  areaServed: ['Urmia', 'Tabriz', 'Tehran', 'Shiraz', 'Iran'],
+  availableLanguage: ['en', 'tr'],
+  contactPoint: {
+    '@type': 'ContactPoint',
+    telephone: SITE.phones.whatsapp,
+    contactType: 'customer service',
+    availableLanguage: ['English', 'Turkish'],
+  },
+};
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: breadcrumbs.map((c, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: c.name,
+    item: new URL(c.url, Astro.site ?? SITE.url).href,
+  })),
+};
+
+const allLd = [medicalBusinessLd, breadcrumbLd, ...jsonLd];
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <meta name="description" content={metaDescription} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="en" href={enUrl} />
+    <link rel="alternate" hreflang="tr" href={trUrl} />
+    <link rel="alternate" hreflang="x-default" href={enUrl} />
+    {allLd.map((ld) => (
+      <script type="application/ld+json" set:html={JSON.stringify(ld)} />
+    ))}
+  </head>
+  <body class="flex min-h-screen flex-col bg-white text-ink-800 antialiased">
+    <slot />
+  </body>
+</html>

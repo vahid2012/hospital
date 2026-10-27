@@ -1,0 +1,161 @@
+---
+import type { Locale } from '../data/site';
+import { SITE } from '../data/site';
+import { DICT } from '../data/i18n';
+import Layout from '../layouts/Layout.astro';
+import Header from './Header.astro';
+import Footer from './Footer.astro';
+import FloatingButtons from './FloatingButtons.astro';
+import { treatments } from '../data/treatments';
+import { cities } from '../data/cities';
+import { getPostsByLocale } from '../data/blog';
+
+type Props = { locale: Locale; canonicalPath: string };
+const { locale, canonicalPath } = Astro.props;
+const t = DICT[locale];
+const h = t.home;
+const s = t.service;
+
+const treatmentBase = locale === 'en' ? `${locale}/treatments` : `${locale}/tedaviler`;
+const cityBase = locale === 'en' ? `${locale}/cities` : `${locale}/sehirler`;
+
+const localeTreatments = treatments.filter((x) => x.locale === locale);
+const localeCities = cities.filter((x) => x.locale === locale);
+
+const enTreatmentLabels: Record<string, string> = { 'fertility-ivf-urmia': t.treatments.fertility, 'cosmetic-surgery-urmia': t.treatments.cosmetic, 'dental-treatment-urmia': t.treatments.dental, 'urmia-tup-bebek': t.treatments.fertility, 'urmia-estetik-cerrahi': t.treatments.cosmetic };
+const enCityLabels: Record<string, string> = { 'urmia-medical-tourism': t.citiesNames.urmia, 'tabriz-medical-tourism': t.citiesNames.tabriz, 'tehran-medical-tourism': t.citiesNames.tehran, 'shiraz-medical-tourism': t.citiesNames.shiraz, 'urmia-saglik-turizmi': t.citiesNames.urmia };
+
+const posts = getPostsByLocale(locale).slice(0, 3);
+const contactPath = `/${locale}/${locale === 'en' ? 'contact' : 'iletisim'}`;
+
+const services = [
+  { icon: 'stethoscope', title: s.coordination, body: s.coordinationBody },
+  { icon: 'scissors', title: s.cosmetic, body: s.cosmeticBody },
+  { icon: 'baby', title: s.fertility, body: s.fertilityBody },
+  { icon: 'visa', title: s.visa, body: s.visaBody },
+  { icon: 'hotel', title: s.hotel, body: s.hotelBody },
+  { icon: 'car', title: s.transfer, body: s.transferBody },
+];
+
+const why = [
+  { title: h.why1Title, body: h.why1Body },
+  { title: h.why2Title, body: h.why2Body },
+  { title: h.why3Title, body: h.why3Body },
+  { title: h.why4Title, body: h.why4Body },
+];
+---
+
+<Layout
+  locale={locale}
+  title={locale === 'en'
+    ? 'Medical Tourism in Iran | Akay Travel +98 44 3346 5524'
+    : "İran'da Sağlık Turizmi | Akay Travel +98 44 3346 5524"}
+  metaDescription={locale === 'en'
+    ? 'Medical tourism in Iran with Akay Travel. IVF, cosmetic surgery and dental in Urmia, Tabriz, Tehran and Shiraz. Call +98 44 3346 5524.'
+    : "İran'da Akay Travel ile sağlık turizmi. Urmia, Tebriz, Tahran ve Şiraz'da tüp bebek, estetik ve diş. WhatsApp +98 914 340 3431."}
+  canonicalPath={canonicalPath}
+  hreflangPath={locale === 'en' ? '/tr/' : '/en/'}
+  breadcrumbs={[{ name: t.breadcrumb.home, url: canonicalPath }]}
+>
+  <Header locale={locale} currentPath={canonicalPath} />
+
+  <section class="relative overflow-hidden bg-gradient-to-br from-primary-700 via-primary-800 to-ink-900 text-white">
+    <div class="container-wide py-20 sm:py-28">
+      <div class="max-w-2xl">
+        <p class="mb-3 text-sm font-semibold uppercase tracking-wide text-primary-200">{h.heroEyebrow}</p>
+        <h1 class="text-4xl font-bold leading-tight sm:text-5xl">{h.heroTitle}</h1>
+        <p class="mt-5 text-lg text-primary-100">{h.heroSubtitle}</p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href={`/${treatmentBase}/cosmetic-surgery-urmia/`} class="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-primary-700 hover:bg-primary-50">{h.heroCta}</a>
+          <a href={contactPath} class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/30 px-5 py-3 text-sm font-semibold text-white hover:bg-white/10">{h.heroCtaSecondary}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="container-wide py-16">
+    <div class="mb-10 text-center">
+      <h2 class="text-3xl font-bold text-ink-900">{h.servicesTitle}</h2>
+      <p class="mt-3 text-ink-600">{h.servicesSubtitle}</p>
+    </div>
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {services.map((svc) => (
+        <div class="card">
+          <div class="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary-100 text-primary-700">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold text-ink-900">{svc.title}</h3>
+          <p class="mt-2 text-sm text-ink-600">{svc.body}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="bg-ink-50 py-16">
+    <div class="container-wide">
+      <div class="mb-10 text-center">
+        <h2 class="text-3xl font-bold text-ink-900">{h.citiesTitle}</h2>
+        <p class="mt-3 text-ink-600">{h.citiesSubtitle}</p>
+      </div>
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {localeCities.map((city) => (
+          <a href={`/${cityBase}/${city.slug}/`} class="card group flex flex-col">
+            <div class="aspect-[4/3] overflow-hidden rounded-xl bg-ink-200">
+              <img src={city.heroImage} alt={city.heroImageAlt} class="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
+            </div>
+            <h3 class="mt-4 text-lg font-semibold text-ink-900 group-hover:text-primary-700">{enCityLabels[city.slug] ?? city.title}</h3>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="container-wide py-16">
+    <div class="mb-10 text-center">
+      <h2 class="text-3xl font-bold text-ink-900">{h.whyTitle}</h2>
+      <p class="mt-3 text-ink-600">{h.whySubtitle}</p>
+    </div>
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {why.map((item, i) => (
+        <div class="text-center">
+          <div class="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 text-xl font-bold text-primary-700">{i + 1}</div>
+          <h3 class="text-lg font-semibold text-ink-900">{item.title}</h3>
+          <p class="mt-2 text-sm text-ink-600">{item.body}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  {posts.length > 0 && (
+    <section class="bg-ink-50 py-16">
+      <div class="container-wide">
+        <h2 class="mb-8 text-3xl font-bold text-ink-900">{t.blog.title}</h2>
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {posts.map((post) => (
+            <a href={`/${locale}/blog/${post.slug}/`} class="card group flex flex-col">
+              <div class="aspect-[16/9] overflow-hidden rounded-xl bg-ink-200">
+                <img src={post.featuredImage} alt={post.featuredImageAlt} class="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
+              </div>
+              <h3 class="mt-4 text-lg font-semibold text-ink-900 group-hover:text-primary-700">{post.title}</h3>
+              <p class="mt-2 text-sm text-ink-600">{post.excerpt}</p>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="bg-primary-700 py-16 text-white">
+    <div class="container-wide text-center">
+      <h2 class="text-3xl font-bold">{h.ctaTitle}</h2>
+      <p class="mx-auto mt-3 max-w-2xl text-primary-100">{h.ctaBody}</p>
+      <div class="mt-6 flex flex-wrap justify-center gap-3">
+        <a href={contactPath} class="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-primary-700 hover:bg-primary-50">{h.ctaButton}</a>
+        <a href={SITE.whatsappLink} target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 rounded-lg bg-success-500 px-5 py-3 text-sm font-semibold text-white hover:bg-success-600">{h.ctaWhatsapp}</a>
+      </div>
+    </div>
+  </section>
+
+  <Footer locale={locale} />
+  <FloatingButtons />
+</Layout>

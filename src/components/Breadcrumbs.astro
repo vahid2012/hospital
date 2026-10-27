@@ -1,0 +1,24 @@
+---
+import { DICT } from '../data/i18n';
+import type { Locale } from '../data/site';
+import type { Crumb } from '../layouts/Layout.astro';
+
+type Props = { locale: Locale; crumbs: Crumb[] };
+const { locale, crumbs } = Astro.props;
+const t = DICT[locale];
+---
+
+<nav aria-label="Breadcrumb" class="container-wide py-4">
+  <ol class="flex flex-wrap items-center gap-1 text-sm text-ink-500">
+    {crumbs.map((c, i) => (
+      <li class="flex items-center gap-1">
+        {i < crumbs.length - 1 ? (
+          <a href={c.url} class="hover:text-primary-700">{c.name}</a>
+        ) : (
+          <span class="font-medium text-ink-700" aria-current="page">{c.name}</span>
+        )}
+        {i < crumbs.length - 1 && <span class="text-ink-300">/</span>}
+      </li>
+    ))}
+  </ol>
+</nav>

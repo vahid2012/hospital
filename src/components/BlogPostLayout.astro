@@ -1,0 +1,133 @@
+---
+import type { Locale } from '../data/site';
+import { SITE } from '../data/site';
+import { DICT } from '../data/i18n';
+import Layout from '../layouts/Layout.astro';
+import Header from './Header.astro';
+import Footer from './Footer.astro';
+import FloatingButtons from './FloatingButtons.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import StickyCTA from './StickyCTA.astro';
+import type { Crumb } from '../layouts/Layout.astro';
+import type { BlogPost } from '../data/blog';
+import { treatments } from '../data/treatments';
+import { cities } from '../data/cities';
+
+type Props = {
+  post: BlogPost;
+  locale: Locale;
+  canonicalPath: string;
+  breadcrumbs: Crumb[];
+};
+const { post, locale, canonicalPath, breadcrumbs } = Astro.props;
+const t = DICT[locale];
+const contactPath = `/${locale}/${locale === 'en' ? 'contact' : 'iletisim'}`;
+
+const blogPostingLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.title,
+  image: new URL(post.featuredImage, SITE.url).href,
+  datePublished: post.date,
+  author: { '@type': 'Organization', name: post.author },
+  publisher: { '@type': 'Organization', name: 'Hospital365 — Akay Travel' },
+  mainEntityOfPage: new URL(canonicalPath, SITE.url).href,
+  description: post.metaDescription,
+};
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: post.faq.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+
+const internalLinks: Record<string, { label: string; href: string }>[] = [];
+---
+
+<Layout
+  locale={locale}
+  title={post.metaTitle}
+  metaDescription={post.metaDescription}
+  canonicalPath={canonicalPath}
+  hreflangPath={post.hreflangPair ? `/${post.hreflangPair}/` : undefined}
+  breadcrumbs={breadcrumbs}
+  jsonLd={[blogPostingLd, faqLd]}
+>
+  <Header locale={locale} currentPath={canonicalPath} />
+  <Breadcrumbs locale={locale} crumbs={breadcrumbs} />
+
+  <article class="container-prose pb-16">
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-ink-900 sm:text-4xl">{post.h1}</h1>
+      <div class="mt-4 flex items-center gap-3 text-sm text-ink-500">
+        <span>{t.blog.publishedOn} {post.dateDisplay}</span>
+        <span aria-hidden="true">·</span>
+        <span>{post.author}</span>
+      </div>
+    </header>
+
+    <div class="aspect-[16/9] overflow-hidden rounded-2xl bg-ink-100">
+      <img src={post.featuredImage} alt={post.featuredImageAlt} class="h-full w-full object-cover" fetchpriority="high" />
+    </div>
+
+    <div class="mt-8 space-y-6">
+      {post.body.map((block) => {
+        if (block.type === 'p') return <p class="text-ink-700" set:html={block.text} />;
+        if (block.type === 'h2') return <h2 class="pt-4 text-2xl font-bold text-ink-900">{block.text}</h2>;
+        if (block.type === 'ul') return (
+          <ul class="space-y-2">
+            {block.items?.map((item) => <li class="flex gap-2 text-ink-700"><svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-primary-600" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="10" r="4"/></svg>{item}</li>)}
+          </ul>
+        );
+        if (block.type === 'table') return (
+          <div>
+            {block.caption && <p class="mb-2 text-sm font-medium text-ink-600">{block.caption}</p>}
+            <table class="w-full overflow-hidden rounded-lg border border-ink-200 text-sm">
+              <tbody>
+                {block.rows?.map((row) => (
+                  <tr class="border-b border-ink-100 last:border-0">
+                    <td class="bg-ink-50 px-4 py-3 font-medium text-ink-700">{row.label}</td>
+                    <td class="px-4 py-3 text-ink-900">{row.value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+        return null;
+      })}
+    </div>
+
+    {post.externalLinks && post.externalLinks.length > 0 && (
+      <section class="mt-8 space-y-3">
+        {post.externalLinks.map((el) => (
+          <p class="rounded-xl border border-primary-200 bg-primary-50 p-4 text-sm text-ink-700">
+            {el.context}{' '}
+            <a href={el.url} target="_blank" rel="noopener" class="font-semibold text-primary-700 underline hover:text-primary-800">{el.anchor}</a>
+          </p>
+        ))}
+      </section>
+    )}
+
+    <section class="mt-12">
+      <h2 class="mb-4 text-2xl font-bold text-ink-900">{t.blog.faqHeading}</h2>
+      <div class="space-y-3">
+        {post.faq.map((f) => (
+          <details class="group rounded-lg border border-ink-200 bg-white p-4">
+            <summary class="cursor-pointer font-medium text-ink-900">{f.q}</summary>
+            <p class="mt-3 text-sm text-ink-700">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <StickyCTA locale={locale} />
+  </article>
+
+  <Footer locale={locale} />
+  <FloatingButtons />
+</Layout>

@@ -1,0 +1,20 @@
+---
+import BlogPostLayout from '../../../components/BlogPostLayout.astro';
+import { getPost } from '../../../data/blog';
+import { DICT } from '../../../data/i18n';
+
+const slug = 'iranda-burun-estetigi-fiyatlari';
+const locale = 'tr' as const;
+const post = getPost(slug, locale);
+if (!post) throw new Error(`Post ${slug} not found`);
+const t = DICT[locale];
+const canonicalPath = `/tr/blog/${slug}/`;
+
+const breadcrumbs = [
+  { name: t.breadcrumb.home, url: '/tr/' },
+  { name: t.breadcrumb.blog, url: '/tr/blog/' },
+  { name: post.breadcrumbName, url: canonicalPath },
+];
+---
+
+<BlogPostLayout post={post} locale={locale} canonicalPath={canonicalPath} breadcrumbs={breadcrumbs} />

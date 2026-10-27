@@ -1,0 +1,20 @@
+---
+import CityLayout from '../../../components/CityLayout.astro';
+import { getCity } from '../../../data/cities';
+import { DICT } from '../../../data/i18n';
+
+const slug = 'tabriz-medical-tourism';
+const locale = 'en' as const;
+const city = getCity(slug, locale);
+if (!city) throw new Error('City ' + slug + ' not found');
+const t = DICT[locale];
+const canonicalPath = '/en/cities/' + slug + '/';
+
+const breadcrumbs = [
+  { name: t.breadcrumb.home, url: '/en/' },
+  { name: t.breadcrumb.cities, url: '/en/cities/' + slug + '/' },
+  { name: city.breadcrumbName, url: canonicalPath },
+];
+---
+
+<CityLayout city={city} locale={locale} canonicalPath={canonicalPath} breadcrumbs={breadcrumbs} />

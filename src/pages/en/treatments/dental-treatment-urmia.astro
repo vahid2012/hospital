@@ -1,0 +1,20 @@
+---
+import TreatmentLayout from '../../../components/TreatmentLayout.astro';
+import { getTreatment } from '../../../data/treatments';
+import { DICT } from '../../../data/i18n';
+
+const slug = 'dental-treatment-urmia';
+const locale = 'en' as const;
+const treatment = getTreatment(slug, locale);
+if (!treatment) throw new Error(`Treatment ${slug} not found`);
+const t = DICT[locale];
+const canonicalPath = `/en/treatments/${slug}/`;
+
+const breadcrumbs = [
+  { name: t.breadcrumb.home, url: '/en/' },
+  { name: t.breadcrumb.treatments, url: `/en/treatments/${slug}/` },
+  { name: treatment.breadcrumbName, url: canonicalPath },
+];
+---
+
+<TreatmentLayout treatment={treatment} locale={locale} canonicalPath={canonicalPath} breadcrumbs={breadcrumbs} />
