@@ -1,4 +1,5 @@
 ---
+import "../styles/global.css"; // 👈 این خط اضافه شد تا استایل‌های Tailwind اعمال شوند
 import { SITE, type Locale } from '../data/site';
 
 export type Crumb = { name: string; url: string };
@@ -66,7 +67,8 @@ const allLd = [medicalBusinessLd, breadcrumbLd, ...jsonLd];
 <html lang={lang}>
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, />
+    <!-- 👈 خطای viewport در اینجا اصلاح شد -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
